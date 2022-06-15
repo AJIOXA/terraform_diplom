@@ -40,6 +40,11 @@ variable "allow_ports_rds" {
   default     = ["5432", "22"]
 }
 
+variable "allow_ports_alb" {
+  description = "List of ports to open fot alb"
+  default     = ["80", "5000", "5432", "22", "443"]
+}
+
 variable "allow_ports_ecs" {
   description = "List of ports to open for app"
   default     = ["5000", "22", "80", "443"]

@@ -47,7 +47,7 @@ resource "aws_ecs_cluster" "fp-ecs-cluster" {
 data "template_file" "task_definition_template" {
   template = file("./task_definition.json.tpl")
   vars = {
-    REPOSITORY_URL    = "762135247538.dkr.ecr.us-east-2.amazonaws.com/project:latest"
+    REPOSITORY_URL    = "762135247538.dkr.ecr.us-east-1.amazonaws.com/project_app_1:latest"
     POSTGRES_USERNAME = "postgres"
     POSTGRES_DATABASE = "postgresdb"
     POSTGRES_ENDPOINT = aws_db_instance.rds_instance.endpoint
