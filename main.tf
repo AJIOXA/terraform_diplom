@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-2"
+  region = "us-east-1"
 }
 
 # create the RDS instance
@@ -47,7 +47,7 @@ resource "aws_ecs_cluster" "fp-ecs-cluster" {
 data "template_file" "task_definition_template" {
   template = file("./task_definition.json.tpl")
   vars = {
-    REPOSITORY_URL    = "762135247538.dkr.ecr.us-east-1.amazonaws.com/project_app:latest"
+    REPOSITORY_URL    = "762135247538.dkr.ecr.us-east-2.amazonaws.com/project:latest"
     POSTGRES_USERNAME = "postgres"
     POSTGRES_DATABASE = "postgresdb"
     POSTGRES_ENDPOINT = aws_db_instance.rds_instance.endpoint
@@ -68,6 +68,8 @@ resource "aws_ecs_task_definition" "task_definition" {
   network_mode             = "awsvpc"
   cpu                      = 256
   memory                   = 512
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
   container_definitions    = data.template_file.task_definition_template.rendered
 }
 
@@ -94,3 +96,39 @@ resource "aws_ecs_service" "flask-service" {
     aws_alb_listener.fp-alb-listener
   ]
 }
+
+#===============
+#role
+#===============
+
+# data "aws_iam_policy_document" "ecs_task_policy" {
+#
+#   statement {
+#     effect = "Allow"
+#     principals {
+#       type        = "Service"
+#       identifiers = ["ecs-tasks.amazonaws.com"]
+#     }
+#     actions = ["sts:AssumeRole"]
+#   }
+# }
+#
+# resource "aws_iam_role" "ecs_task_role" {
+#   name                 = "project-ecs-task-role"
+#   assume_role_policy   = data.aws_iam_policy_document.ecs_task_policy.json
+#   permissions_boundary = "arn:aws:iam::<account>:policy/<policy>"
+#   # tags = merge({
+#   #   "name" = "${var.environment}"
+#   #   }, var.tags
+#   # )
+# }
+#
+# resource "aws_iam_role" "ecs_execution_role" {
+#   name                 = "project-exec-task-role"
+#   assume_role_policy   = data.aws_iam_policy_document.ecs_task_policy.json
+#   permissions_boundary = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/ccoe/developer"
+#   # tags = merge({
+#   #   "name" = "${var.environment}"
+#   #   }, var.tags
+#   # )
+# }
